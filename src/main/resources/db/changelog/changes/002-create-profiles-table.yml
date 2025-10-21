@@ -1,0 +1,66 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-profiles-table
+      author: developer
+      changes:
+        - createTable:
+            tableName: profiles
+            columns:
+              - column:
+                  name: account_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: display_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: avatar_url
+                  type: VARCHAR(255)
+              - column:
+                  name: bio
+                  type: TEXT
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: OFFLINE
+              - column:
+                  name: last_active_at
+                  type: BIGINT
+              - column:
+                  name: updated_at
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            baseTableName: profiles
+            baseColumnNames: account_id
+            constraintName: fk_profiles_account
+            referencedTableName: accounts
+            referencedColumnNames: account_id
+            onDelete: CASCADE
+
+        #        - addCheckConstraint:
+        #            tableName: profiles
+        #            constraintName: chk_status
+        #            checkConstraint: "status IN ('ONLINE', 'OFFLINE', 'AWAY', 'DND')"
+        - sql:
+            sql: |
+              ALTER TABLE profiles
+              ADD CONSTRAINT chk_status CHECK (status IN ('ONLINE', 'OFFLINE', 'AWAY', 'DND'));
+
+
+        - createIndex:
+            tableName: profiles
+            indexName: idx_username
+            columns:
+              - column:
+                  name: username

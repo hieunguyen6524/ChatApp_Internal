@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-create-roles-table
+      author: developer
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: role_id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: role_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: role_name
+                  value: ADMIN
+
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: role_name
+                  value: MEMBER
+
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: role_name
+                  value: GUEST

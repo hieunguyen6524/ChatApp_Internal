@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-refresh-contexts-table
+      author: developer
+      changes:
+        - createTable:
+            tableName: refresh_contexts
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: context_id
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: expiry_date
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: revoked
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: created_at
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            baseTableName: refresh_contexts
+            baseColumnNames: account_id
+            constraintName: fk_refresh_context_account
+            referencedTableName: accounts
+            referencedColumnNames: account_id
+            onDelete: CASCADE
+
+        - createIndex:
+            tableName: refresh_contexts
+            indexName: idx_context_id
+            columns:
+              - column:
+                  name: context_id

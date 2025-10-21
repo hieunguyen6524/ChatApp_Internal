@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-accounts-table
+      author: developer
+      changes:
+        - createTable:
+            tableName: accounts
+            columns:
+              - column:
+                  name: account_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: provider
+                  type: VARCHAR(20)
+                  defaultValue: LOCAL
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_verified
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: updated_at
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+
+        #        - addCheckConstraint:
+        #            tableName: accounts
+        #            constraintName: chk_provider
+        #            checkConstraint: "provider IN ('LOCAL', 'GOOGLE', 'SSO')"
+        - sql:
+            sql: |
+              ALTER TABLE accounts
+              ADD CONSTRAINT chk_provider CHECK (provider IN ('LOCAL', 'GOOGLE', 'SSO'));
+
+        - createIndex:
+            tableName: accounts
+            indexName: idx_email
+            columns:
+              - column:
+                  name: email

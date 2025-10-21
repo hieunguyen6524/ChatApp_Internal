@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-create-blacklisted-tokens-table
+      author: developer
+      changes:
+        - createTable:
+            tableName: blacklisted_tokens
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: token
+                  type: VARCHAR(512)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: account_id
+                  type: BIGINT
+              - column:
+                  name: reason
+                  type: VARCHAR(255)
+              - column:
+                  name: created_at
+                  type: BIGINT
+              - column:
+                  name: expires_at
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            baseTableName: blacklisted_tokens
+            baseColumnNames: account_id
+            constraintName: fk_blacklisted_token_account
+            referencedTableName: accounts
+            referencedColumnNames: account_id
+            onDelete: CASCADE
+
+        - createIndex:
+            tableName: blacklisted_tokens
+            indexName: idx_token
+            columns:
+              - column:
+                  name: token

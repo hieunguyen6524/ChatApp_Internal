@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-create-verification-tokens-table
+      author: developer
+      changes:
+        - createTable:
+            tableName: verification_tokens
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: account_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: token
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email_target
+                  type: VARCHAR(100)
+              - column:
+                  name: expiry_date
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: used
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: created_at
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            baseTableName: verification_tokens
+            baseColumnNames: account_id
+            constraintName: fk_verification_token_account
+            referencedTableName: accounts
+            referencedColumnNames: account_id
+            onDelete: CASCADE
+
+        #        - addCheckConstraint:
+        #            tableName: verification_tokens
+        #            constraintName: chk_token_type
+        #            checkConstraint: "type IN ('EMAIL_VERIFICATION', 'RESET_PASSWORD', 'CHANGE_EMAIL', 'INVITATION')"
+        - sql:
+            sql: |
+              ALTER TABLE verification_tokens
+              ADD CONSTRAINT chk_token_type
+              CHECK (type IN ('EMAIL_VERIFICATION', 'RESET_PASSWORD', 'CHANGE_EMAIL', 'INVITATION'));
+
+
+        - createIndex:
+            tableName: verification_tokens
+            indexName: idx_token
+            columns:
+              - column:
+                  name: token
