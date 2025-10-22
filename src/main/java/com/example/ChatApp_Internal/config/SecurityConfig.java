@@ -1,6 +1,9 @@
-package com.example.ChatApp_Internal.security;
+package com.example.ChatApp_Internal.config;
 
 import com.example.ChatApp_Internal.repository.BlacklistedTokenRepository;
+import com.example.ChatApp_Internal.security.AuthTokenFilter;
+import com.example.ChatApp_Internal.security.CustomUserDetailsService;
+import com.example.ChatApp_Internal.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -6,14 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GoogleAuthRequest {
-    @NotBlank(message = "Authorization code is required")
-    private String code;
-
-    private String redirectUri;
+public class GoogleIdTokenRequest {
+    @NotBlank(message = "ID token is required")
+    private String idToken;
 }

@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: 999-modify-profiles-columns
+      author: developer
+      changes:
+        # chuyển cột display_name sang utf8mb4
+        - sql:
+            sql: |
+              ALTER TABLE profiles
+              MODIFY display_name VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
+
+        # chuyển cột bio (TEXT)
+        - sql:
+            sql: |
+              ALTER TABLE profiles
+              MODIFY bio TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL;
+
+#        # ví dụ đổi cột username nếu cần
+#        - sql:
+#            sql: |
+#              ALTER TABLE profiles
+#              MODIFY username VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
+#
+#        # đổi một số cột khác ví dụ accounts.email
+#        - sql:
+#            sql: |
+#              ALTER TABLE accounts
+#              MODIFY email VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;

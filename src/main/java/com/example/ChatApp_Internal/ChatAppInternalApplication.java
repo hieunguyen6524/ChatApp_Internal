@@ -5,7 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /*
  * Fix loi /refresh  thi revoke luon refresh token
- * Lam dang ky bang gg
+ * Lam dang ky bang gg (dang bi loi sau moi lan chay lai server thi lan dang nhap dau tien luon bi loi mac du da tao tai khoan thanh cong)
+ *
  * */
 
 @SpringBootApplication
