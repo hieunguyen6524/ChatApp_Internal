@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -45,7 +44,6 @@ public class GoogleAuthService {
     @Transactional
     public AuthResponse authenticateWithGoogle(GoogleAuthRequest request) {
         // Exchange code for token
-        System.out.println("redirec" + request.getRedirectUri());
         GoogleTokenResponse tokenResponse = googleOAuth2Service.exchangeCodeForToken(
                 request.getCode(),
                 request.getRedirectUri()
@@ -131,10 +129,10 @@ public class GoogleAuthService {
      * Create new account from Google user info
      */
     private Account createGoogleAccount(GoogleUserInfo googleUser) {
-        Optional<Account> existing = accountRepository.findByEmail(googleUser.getEmail());
-        if (existing.isPresent()) {
-            return existing.get(); // Nếu user đã có, trả về luôn
-        }
+//        Optional<Account> existing = accountRepository.findByEmail(googleUser.getEmail());
+//        if (existing.isPresent()) {
+//            return existing.get(); // Nếu user đã có, trả về luôn
+//        }
         // Create account
         Account account = Account.builder()
                 .email(googleUser.getEmail())

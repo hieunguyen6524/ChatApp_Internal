@@ -14,6 +14,7 @@ public class GoogleUserInfo {
     @JsonProperty("sub")
     private String id;
 
+    @JsonProperty("email")
     private String email;
 
     @JsonProperty("email_verified")

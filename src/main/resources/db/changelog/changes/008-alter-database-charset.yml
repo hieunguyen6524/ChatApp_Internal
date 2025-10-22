@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-alter-database-charset
+      author: developer
+      preConditions:
+        - onFail: MARK_RAN
+      changes:
+        # Alter database default charset
+        - sql:
+            sql: "ALTER DATABASE chat_internal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+        # Alter accounts table
+        - sql:
+            sql: "ALTER TABLE accounts CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+        # Alter profiles table
+        - sql:
+            sql: "ALTER TABLE profiles CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+        # Alter roles table
+        - sql:
+            sql: "ALTER TABLE roles CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+        # Alter account_roles table
+        - sql:
+            sql: "ALTER TABLE account_roles CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+        # Alter refresh_contexts table
+        - sql:
+            sql: "ALTER TABLE refresh_contexts CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+        # Alter blacklisted_tokens table
+        - sql:
+            sql: "ALTER TABLE blacklisted_tokens CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+        # Alter verification_tokens table
+        - sql:
+            sql: "ALTER TABLE verification_tokens CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
