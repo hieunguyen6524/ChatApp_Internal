@@ -1,0 +1,50 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-message-attachments-table
+      author: developer
+      changes:
+        - createTable:
+            tableName: message_attachments
+            remarks: "Link files to messages"
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: message_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+            modifySql:
+              dbms: mysql
+              append:
+                value: " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+
+        - addUniqueConstraint:
+            tableName: message_attachments
+            columnNames: message_id, file_id
+            constraintName: uk_message_file
+
+        - createIndex:
+            tableName: message_attachments
+            indexName: idx_message_id
+            columns:
+              - column:
+                  name: message_id
+
+        - createIndex:
+            tableName: message_attachments
+            indexName: idx_file_id
+            columns:
+              - column:
+                  name: file_id

@@ -15,3 +15,9 @@ databaseChangeLog:
       file: db/changelog/changes/007-create-verification-tokens-table.yml
   - include:
       file: db/changelog/changes/008-alter-database-charset.yml
+  - include:
+      file: db/changelog/changes/009-create-file-metadata-table.yml
+  - include:
+      file: db/changelog/changes/010-create-message-attachments-table.yml
+  - include:
+      file: db/changelog/changes/011-create-workspace-file-quota-table.yml

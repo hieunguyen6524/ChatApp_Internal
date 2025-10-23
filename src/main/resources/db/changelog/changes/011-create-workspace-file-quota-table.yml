@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-create-workspace-file-quota-table
+      author: developer
+      changes:
+        - createTable:
+            tableName: workspace_file_quota
+            remarks: "Track file storage quota per workspace"
+            columns:
+              - column:
+                  name: workspace_id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: max_storage_bytes
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                  defaultValue: 1073741824
+                  remarks: "Default 1GB"
+              - column:
+                  name: current_used_bytes
+                  type: BIGINT
+                  defaultValue: 0
+              - column:
+                  name: updated_at
+                  type: BIGINT
+
+            modifySql:
+              dbms: mysql
+              append:
+                value: " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"

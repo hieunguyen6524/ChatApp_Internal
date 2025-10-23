@@ -1,0 +1,103 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-create-file-metadata-table
+      author: developer
+      changes:
+        - createTable:
+            tableName: file_metadata
+            remarks: "Store file metadata for S3 uploads"
+            columns:
+              - column:
+                  name: file_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: s3_key
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: original_file_name
+                  type: VARCHAR(255)
+              - column:
+                  name: content_type
+                  type: VARCHAR(100)
+              - column:
+                  name: file_size
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: url
+                  type: VARCHAR(1000)
+              - column:
+                  name: is_deleted
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: BIGINT
+              - column:
+                  name: updated_at
+                  type: BIGINT
+              - column:
+                  name: deleted_at
+                  type: BIGINT
+
+            modifySql:
+              dbms: mysql
+              append:
+                value: " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+
+        - addForeignKeyConstraint:
+            baseTableName: file_metadata
+            baseColumnNames: account_id
+            constraintName: fk_file_metadata_account
+            referencedTableName: accounts
+            referencedColumnNames: account_id
+            onDelete: CASCADE
+
+        - createIndex:
+            tableName: file_metadata
+            indexName: idx_account_id
+            columns:
+              - column:
+                  name: account_id
+
+        - createIndex:
+            tableName: file_metadata
+            indexName: idx_s3_key
+            unique: true
+            columns:
+              - column:
+                  name: s3_key
+
+        - createIndex:
+            tableName: file_metadata
+            indexName: idx_file_type
+            columns:
+              - column:
+                  name: file_type
+
+        - createIndex:
+            tableName: file_metadata
+            indexName: idx_is_deleted
+            columns:
+              - column:
+                  name: is_deleted

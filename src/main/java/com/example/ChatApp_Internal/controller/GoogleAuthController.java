@@ -86,6 +86,8 @@ public class GoogleAuthController {
         // Set refresh token in cookie if available
         // Note: The refresh token should be extracted from authResponse
         // and set in cookie here or in the service
+        String refreshToken = authResponse.getRefreshToken();
+        cookieUtil.addRefreshTokenCookie(httpResponse, refreshToken);
 
         return ResponseEntity.ok(ApiResponse.success(
                 "Google authentication successful",
