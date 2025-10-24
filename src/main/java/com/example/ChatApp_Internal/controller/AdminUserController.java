@@ -4,7 +4,9 @@ import com.example.ChatApp_Internal.dto.request.UpdateUserRolesRequest;
 import com.example.ChatApp_Internal.dto.response.AdminUserResponse;
 import com.example.ChatApp_Internal.dto.response.ApiResponse;
 import com.example.ChatApp_Internal.dto.response.PageResponse;
+import com.example.ChatApp_Internal.dto.response.UserInfo;
 import com.example.ChatApp_Internal.service.AdminService;
+import com.example.ChatApp_Internal.service.ProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import java.util.List;
 public class AdminUserController {
 
     private final AdminService adminService;
+    private final ProfileService profileService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<AdminUserResponse>>> getAllUsers(
@@ -73,6 +76,9 @@ public class AdminUserController {
 
     @DeleteMapping("/{accountId}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long accountId) {
+        UserInfo userInfo = profileService.getCurrentUserInfo();
+        if (accountId.equals(userInfo.getAccountId()))
+            throw new RuntimeException("You can't delete yourself");
         adminService.deleteUser(accountId);
         return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null));
     }

@@ -12,6 +12,7 @@ import com.example.ChatApp_Internal.security.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -39,6 +40,11 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    @Value("${app.mail.forgot_password_token-ms}")
+    private Long forgotPasswordTokenMs;
+    @Value("${app.mail.verify_email_token-ms}")
+    private Long verifyEmailTokenMs;
+
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -83,7 +89,7 @@ public class AuthService {
                 .account(account)
                 .token(token)
                 .type(TokenType.EMAIL_VERIFICATION)
-                .expiryDate(System.currentTimeMillis() + 86400000) // 24 hours
+                .expiryDate(System.currentTimeMillis() + verifyEmailTokenMs)
                 .used(false)
                 .build();
         verificationTokenRepository.save(verificationToken);
@@ -125,6 +131,9 @@ public class AuthService {
         String contextId = UUID.randomUUID().toString();
         String accessToken = jwtService.generateAccessToken(account.getEmail(), roles);
         String refreshToken = jwtService.generateRefreshToken(account.getEmail(), contextId);
+
+        refreshContextRepository.revokeAllActiveByAccountId(account.getAccountId());
+        log.info("Revoked all active refresh tokens for user {}", account.getAccountId());
 
         // Save refresh context
         RefreshContext refreshContext = RefreshContext.builder()
@@ -178,7 +187,10 @@ public class AuthService {
                 .map(Role::getRoleName)
                 .collect(Collectors.toList());
 
-        // Generate new tokens (Token Rotation)
+        if (!account.getIsActive()) {
+            throw new RuntimeException("Account is not active");
+        }
+
         String newContextId = UUID.randomUUID().toString();
         String newAccessToken = jwtService.generateAccessToken(account.getEmail(), roles);
         String newRefreshToken = jwtService.generateRefreshToken(account.getEmail(), newContextId);
@@ -187,7 +199,7 @@ public class AuthService {
         refreshContext.setRevoked(true);
         refreshContextRepository.save(refreshContext);
 
-        // Create new refresh context
+
         RefreshContext newRefreshContext = RefreshContext.builder()
                 .account(account)
                 .contextId(newContextId)
@@ -236,6 +248,7 @@ public class AuthService {
                 context.setRevoked(true);
                 refreshContextRepository.save(context);
             });
+
         }
 
         log.info("User logged out successfully");
@@ -243,6 +256,7 @@ public class AuthService {
 
     @Transactional
     public void verifyEmail(String token) {
+        System.out.println(verifyEmailTokenMs);
         VerificationToken verificationToken = verificationTokenRepository
                 .findByTokenAndType(token, TokenType.EMAIL_VERIFICATION)
                 .orElseThrow(() -> new RuntimeException("Invalid verification token"));
@@ -275,7 +289,7 @@ public class AuthService {
                 .account(account)
                 .token(token)
                 .type(TokenType.RESET_PASSWORD)
-                .expiryDate(System.currentTimeMillis() + 3600000) // 1 hour
+                .expiryDate(System.currentTimeMillis() + forgotPasswordTokenMs) // 1 hour
                 .used(false)
                 .build();
         verificationTokenRepository.save(resetToken);

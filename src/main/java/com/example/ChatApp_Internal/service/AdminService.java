@@ -134,9 +134,6 @@ public class AdminService {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Don't allow deleting your own account
-        // This check should be done in controller with current user context
-
         accountRepository.delete(account);
 
         log.info("User deleted: {}", account.getEmail());

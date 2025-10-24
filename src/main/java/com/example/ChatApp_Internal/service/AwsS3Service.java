@@ -219,4 +219,5 @@ public class AwsS3Service {
         return accountRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
     }
+
 }

@@ -28,9 +28,6 @@ public class GoogleOAuth2Service {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    /**
-     * Get authorization URL for Google OAuth2 flow
-     */
     public String getAuthorizationUrl(String state) {
         String scope = "openid email profile";
 

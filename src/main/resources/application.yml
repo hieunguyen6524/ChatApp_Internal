@@ -49,6 +49,9 @@ spring:
 
 # Application Configuration
 app:
+  mail:
+    forgot_password_token-ms: ${APP_FORGOT_PASSWORD_TOKEN_MS:3600000}
+    verify_email_token-ms: ${APP_VERIFY_EMAIL_TOKEN_MS:86400000}
   jwt:
     secret: ${APP_JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
     access-token-expiration-ms: ${APP_JWT_ACCESS_TOKEN_EXPIRATION_MS:900000}
@@ -93,9 +96,3 @@ upload:
   max-request-size: 52428800  # 50MB
   allowed-extensions: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt,zip,rar
   allowed-image-extensions: jpg,jpeg,png,gif
-
-#logging:
-#  level:
-#    com.company.ChatApp_Internal: DEBUG
-#    org.springframework.security: DEBUG
-#    liquibase: INFO

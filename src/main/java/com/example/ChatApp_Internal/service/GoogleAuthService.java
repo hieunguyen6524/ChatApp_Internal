@@ -102,6 +102,9 @@ public class GoogleAuthService {
         String accessToken = jwtService.generateAccessToken(account.getEmail(), roles);
         String refreshToken = jwtService.generateRefreshToken(account.getEmail(), contextId);
 
+        refreshContextRepository.revokeAllActiveByAccountId(account.getAccountId());
+        log.info("Revoked all active refresh tokens for user {}", account.getAccountId());
+
         // Save refresh context
         RefreshContext refreshContext = RefreshContext.builder()
                 .account(account)
@@ -120,6 +123,7 @@ public class GoogleAuthService {
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .tokenType("Bearer")
                 .userInfo(mapToUserInfo(account, account.getProfile()))
                 .build();
@@ -129,11 +133,6 @@ public class GoogleAuthService {
      * Create new account from Google user info
      */
     private Account createGoogleAccount(GoogleUserInfo googleUser) {
-//        Optional<Account> existing = accountRepository.findByEmail(googleUser.getEmail());
-//        if (existing.isPresent()) {
-//            return existing.get(); // Nếu user đã có, trả về luôn
-//        }
-        // Create account
         Account account = Account.builder()
                 .email(googleUser.getEmail())
                 .password(null) // No password for OAuth users
