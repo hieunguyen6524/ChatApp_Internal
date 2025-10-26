@@ -1,0 +1,153 @@
+databaseChangeLog:
+  - changeSet:
+      id: 013-create-conversation-tables
+      author: developer
+      changes:
+        # Conversations table (channels and DMs)
+        - createTable:
+            tableName: conversations
+            columns:
+              - column:
+                  name: conversation_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: workspace_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_private
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: is_archived
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: created_by
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: created_at
+                  type: BIGINT
+              - column:
+                  name: updated_at
+                  type: BIGINT
+
+            modifySql:
+              dbms: mysql
+              append:
+                value: " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        - sql:
+            sql: |
+              ALTER TABLE conversations
+              ADD CONSTRAINT chk_conversation_type CHECK (type IN ('CHANNEL', 'DM_PAIR', 'DM_GROUP'));
+
+        - addForeignKeyConstraint:
+            baseTableName: conversations
+            baseColumnNames: workspace_id
+            constraintName: fk_conversations_workspace
+            referencedTableName: workspaces
+            referencedColumnNames: workspace_id
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: conversations
+            baseColumnNames: created_by
+            constraintName: fk_conversations_creator
+            referencedTableName: accounts
+            referencedColumnNames: account_id
+            onDelete: SET NULL
+
+        - createIndex:
+            tableName: conversations
+            indexName: idx_workspace_id
+            columns:
+              - column:
+                  name: workspace_id
+
+        - createIndex:
+            tableName: conversations
+            indexName: idx_type
+            columns:
+              - column:
+                  name: type
+
+              # Conversation members table
+              - createTable:
+                  tableName: conversation_members
+                  columns:
+                    - column:
+                        name: id
+                        type: BIGINT
+                        autoIncrement: true
+                        constraints:
+                          primaryKey: true
+                    - column:
+                        name: conversation_id
+                        type: BIGINT
+                        constraints:
+                          nullable: false
+                    - column:
+                        name: account_id
+                        type: BIGINT
+                        constraints:
+                          nullable: false
+                    - column:
+                        name: is_channel_admin
+                        type: BOOLEAN
+                        defaultValueBoolean: false
+                    - column:
+                        name: joined_at
+                        type: BIGINT
+                    - column:
+                        name: last_read_message_id
+                        type: BIGINT
+                    - column:
+                        name: last_read_at
+                        type: BIGINT
+                    - column:
+                        name: is_notif_enabled
+                        type: BOOLEAN
+                        defaultValueBoolean: true
+
+                  modifySql:
+                    dbms: mysql
+                    append:
+                      value: " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+
+              - addUniqueConstraint:
+                  tableName: conversation_members
+                  columnNames: conversation_id, account_id
+                  constraintName: uk_convo_user
+
+              - addForeignKeyConstraint:
+                  baseTableName: conversation_members
+                  baseColumnNames: conversation_id
+                  constraintName: fk_convo_members_conversation
+                  referencedTableName: conversations
+                  referencedColumnNames: conversation_id
+                  onDelete: CASCADE
+
+              - addForeignKeyConstraint:
+                  baseTableName: conversation_members
+                  baseColumnNames: account_id
+                  constraintName: fk_convo_members_account
+                  referencedTableName: accounts
+                  referencedColumnNames: account_id
+                  onDelete: CASCADE

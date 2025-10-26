@@ -21,3 +21,9 @@ databaseChangeLog:
       file: db/changelog/changes/010-create-message-attachments-table.yml
   - include:
       file: db/changelog/changes/011-create-workspace-file-quota-table.yml
+  - include:
+      file: db/changelog/changes/012-create-workspace-tables.yml
+  - include:
+      file: db/changelog/changes/013-create-conversation-tables.yml
+  - include:
+      file: db/changelog/changes/014-create-message-tables.yml

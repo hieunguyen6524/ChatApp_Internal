@@ -1,0 +1,216 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-create-message-tables
+      author: developer
+      changes:
+        # Messages table
+        - createTable:
+            tableName: messages
+            columns:
+              - column:
+                  name: message_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: conversation_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sender_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: parent_id
+                  type: BIGINT
+              - column:
+                  name: content
+                  type: TEXT
+              - column:
+                  name: content_type
+                  type: VARCHAR(20)
+                  defaultValue: TEXT
+              - column:
+                  name: is_deleted
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: is_pinned
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+              - column:
+                  name: created_at
+                  type: BIGINT
+              - column:
+                  name: updated_at
+                  type: BIGINT
+
+            modifySql:
+              dbms: mysql
+              append:
+                value: " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+
+        #        - addCheckConstraint:
+        #            tableName: messages
+        #            constraintName: chk_content_type
+        #            checkConstraint: "content_type IN ('TEXT', 'MARKDOWN', 'CODE', 'SYSTEM')"
+        - sql:
+            sql: |
+              ALTER TABLE messages
+              ADD CONSTRAINT chk_content_type CHECK (content_type IN ('TEXT', 'MARKDOWN', 'CODE', 'SYSTEM'));
+
+        - addForeignKeyConstraint:
+            baseTableName: messages
+            baseColumnNames: conversation_id
+            constraintName: fk_messages_conversation
+            referencedTableName: conversations
+            referencedColumnNames: conversation_id
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: messages
+            baseColumnNames: sender_id
+            constraintName: fk_messages_sender
+            referencedTableName: accounts
+            referencedColumnNames: account_id
+            onDelete: SET NULL
+
+        - addForeignKeyConstraint:
+            baseTableName: messages
+            baseColumnNames: parent_id
+            constraintName: fk_messages_parent
+            referencedTableName: messages
+            referencedColumnNames: message_id
+            onDelete: SET NULL
+
+        - createIndex:
+            tableName: messages
+            indexName: idx_conversation_id
+            columns:
+              - column:
+                  name: conversation_id
+
+        - createIndex:
+            tableName: messages
+            indexName: idx_sender_id
+            columns:
+              - column:
+                  name: sender_id
+
+        - createIndex:
+            tableName: messages
+            indexName: idx_created_at
+            columns:
+              - column:
+                  name: created_at
+
+        # Message reactions table
+        - createTable:
+            tableName: message_reactions
+            columns:
+              - column:
+                  name: message_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: emoji
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reacted_at
+                  type: BIGINT
+
+            modifySql:
+              dbms: mysql
+              append:
+                value: " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+
+        - addPrimaryKey:
+            tableName: message_reactions
+            columnNames: message_id, account_id, emoji
+            constraintName: pk_message_reactions
+
+        - addForeignKeyConstraint:
+            baseTableName: message_reactions
+            baseColumnNames: message_id
+            constraintName: fk_reactions_message
+            referencedTableName: messages
+            referencedColumnNames: message_id
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: message_reactions
+            baseColumnNames: account_id
+            constraintName: fk_reactions_account
+            referencedTableName: accounts
+            referencedColumnNames: account_id
+            onDelete: CASCADE
+
+        # Message mentions table
+        - createTable:
+            tableName: message_mentions
+            columns:
+              - column:
+                  name: message_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: mentioned_account_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+            modifySql:
+              dbms: mysql
+              append:
+                value: " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+
+        - addPrimaryKey:
+            tableName: message_mentions
+            columnNames: message_id, mentioned_account_id
+            constraintName: pk_message_mentions
+
+        - addForeignKeyConstraint:
+            baseTableName: message_mentions
+            baseColumnNames: message_id
+            constraintName: fk_mentions_message
+            referencedTableName: messages
+            referencedColumnNames: message_id
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: message_mentions
+            baseColumnNames: mentioned_account_id
+            constraintName: fk_mentions_account
+            referencedTableName: accounts
+            referencedColumnNames: account_id
+            onDelete: CASCADE
+
+        # Update message_attachments foreign key
+        - addForeignKeyConstraint:
+            baseTableName: message_attachments
+            baseColumnNames: message_id
+            constraintName: fk_attachments_message
+            referencedTableName: messages
+            referencedColumnNames: message_id
+            onDelete: CASCADE
+
+        # Update workspace_file_quota foreign key
+        - addForeignKeyConstraint:
+            baseTableName: workspace_file_quota
+            baseColumnNames: workspace_id
+            constraintName: fk_file_quota_workspace
+            referencedTableName: workspaces
+            referencedColumnNames: workspace_id
+            onDelete: CASCADE
