@@ -38,6 +38,7 @@ public class Workspace {
     @Column(name = "updated_at")
     private Long updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL)
     private Set<WorkspaceMember> members = new HashSet<>();
 

@@ -2,6 +2,7 @@ package com.example.ChatApp_Internal.dto.response;
 
 
 import com.example.ChatApp_Internal.entity.UserStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserInfo {
     private Long accountId;
     private String email;

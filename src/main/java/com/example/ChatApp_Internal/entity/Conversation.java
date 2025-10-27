@@ -49,6 +49,7 @@ public class Conversation {
     @Column(name = "updated_at")
     private Long updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
     private Set<ConversationMember> members = new HashSet<>();
 
