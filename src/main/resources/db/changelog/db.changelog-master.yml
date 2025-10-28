@@ -27,3 +27,5 @@ databaseChangeLog:
       file: db/changelog/changes/013-create-conversation-tables.yml
   - include:
       file: db/changelog/changes/014-create-message-tables.yml
+  - include:
+      file: db/changelog/changes/015-add-soft-delete-to-conversation-members.yml

@@ -1,9 +1,11 @@
 package com.example.ChatApp_Internal.controller;
 
 
+import com.example.ChatApp_Internal.dto.request.AddMemberRequest;
 import com.example.ChatApp_Internal.dto.request.CreateConversationRequest;
 import com.example.ChatApp_Internal.dto.response.ApiResponse;
 import com.example.ChatApp_Internal.dto.response.ConversationResponse;
+import com.example.ChatApp_Internal.dto.response.MemberResponse;
 import com.example.ChatApp_Internal.service.ConversationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +24,8 @@ public class ConversationController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<ConversationResponse>> createConversation(@Valid @RequestBody CreateConversationRequest request) {
-        ConversationResponse conversationResponse = conversationService.createConversation(request);
-        return ResponseEntity.ok(ApiResponse.success("Conversation created successfully", conversationResponse));
+        ConversationResponse conversation = conversationService.createConversation(request);
+        return ResponseEntity.ok(ApiResponse.success("Conversation created successfully", conversation));
     }
 
     @GetMapping("/workspace/{workspaceId}")
@@ -34,4 +36,39 @@ public class ConversationController {
         return ResponseEntity.ok(ApiResponse.success(conversations));
     }
 
+    @GetMapping("/{conversationId}")
+    public ResponseEntity<ApiResponse<ConversationResponse>> getConversation(@PathVariable Long conversationId) {
+        ConversationResponse conversation = conversationService.getConversationById(conversationId);
+
+        return ResponseEntity.ok(ApiResponse.success(conversation));
+    }
+
+    @PostMapping("/{conversationId}/members")
+    public ResponseEntity<ApiResponse<MemberResponse>> addMember(
+            @PathVariable Long conversationId,
+            @Valid @RequestBody AddMemberRequest request) {
+        MemberResponse member = conversationService.addConversationMember(conversationId, request);
+        return ResponseEntity.ok(ApiResponse.success("Member added successfully", member));
+    }
+
+    @GetMapping("/{conversationId}/members")
+    public ResponseEntity<ApiResponse<List<MemberResponse>>> getMembers(
+            @PathVariable Long conversationId) {
+        List<MemberResponse> members = conversationService.getConversationMembers(conversationId);
+        return ResponseEntity.ok(ApiResponse.success(members));
+    }
+
+    @DeleteMapping("{conversationId}/members/{memberId}")
+    public ResponseEntity<ApiResponse<Void>> removeMember(
+            @PathVariable Long conversationId,
+            @PathVariable Long memberId) {
+        conversationService.removeMember(conversationId, memberId);
+        return ResponseEntity.ok(ApiResponse.success("Member removed successfully", null));
+    }
+
+    @DeleteMapping("/{conversationId}/leave")
+    public ResponseEntity<ApiResponse<Void>> leaveWorkspace(@PathVariable Long conversationId) {
+        conversationService.leaveConversation(conversationId);
+        return ResponseEntity.ok(ApiResponse.success("Left conversation successfully", null));
+    }
 }

@@ -38,6 +38,12 @@ public class ConversationMember {
     @Column(name = "is_notif_enabled")
     private Boolean isNotifEnabled = true;
 
+    @Column(name = "is_active")
+    private Boolean isActive = true;
+
+    @Column(name = "left_at")
+    private Long leftAt;
+
     @PrePersist
     protected void onCreate() {
         joinedAt = System.currentTimeMillis();

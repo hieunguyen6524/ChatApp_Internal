@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-add-soft-delete-to-conversation-members
+      author: developer
+      changes:
+        - addColumn:
+            tableName: conversation_members
+            columns:
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  remarks: "Soft delete flag for conversation members"
+              - column:
+                  name: left_at
+                  type: BIGINT
+                  remarks: "Timestamp when member left the conversation"

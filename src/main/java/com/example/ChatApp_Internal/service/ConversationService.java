@@ -1,6 +1,7 @@
 package com.example.ChatApp_Internal.service;
 
 
+import com.example.ChatApp_Internal.dto.request.AddMemberRequest;
 import com.example.ChatApp_Internal.dto.request.CreateConversationRequest;
 import com.example.ChatApp_Internal.dto.response.ConversationResponse;
 import com.example.ChatApp_Internal.dto.response.MemberResponse;
@@ -98,12 +99,98 @@ public class ConversationService {
                 .collect(Collectors.toList());
     }
 
-//    @Transactional
-//    public MemberResponse addConversationMember(Long conversationId, AddMemberRequest request) {
-//        Account currentAccount = getCurrentAccount();
-//
-//        verifyConversationAdmin();
-//    }
+    public ConversationResponse getConversationById(Long conversationId) {
+        Account currentAccount = getCurrentAccount();
+
+        verifyConversationMembership(conversationId, currentAccount.getAccountId());
+        Conversation conversation = conversationRepository.findById(conversationId).orElseThrow(() -> new RuntimeException("Conversation not found"));
+
+
+        return mapToConversationResponse(conversation, currentAccount);
+    }
+
+    @Transactional
+    public MemberResponse addConversationMember(Long conversationId, AddMemberRequest request) {
+        Account currentAccount = getCurrentAccount();
+
+        verifyConversationAdmin(conversationId, currentAccount.getAccountId());
+
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new RuntimeException("Conversation not found"));
+
+        Account newMember = accountRepository.findById(request.getAccountId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        ConversationMember existingMember = conversationMemberRepository
+                .findByConversationConversationIdAndAccountAccountId(conversationId, newMember.getAccountId())
+                .orElse(null);
+
+        if (existingMember != null) {
+            if (existingMember.getIsActive()) {
+                throw new RuntimeException("User is already a member");
+            }
+
+            existingMember.setIsActive(true);
+            conversationMemberRepository.save(existingMember);
+            log.info("Member added to conversation {}: {}", conversation.getName(), newMember.getEmail());
+            return mapToConversationMemberResponse(existingMember);
+        }
+
+        ConversationMember member = ConversationMember.builder()
+                .conversation(conversation)
+                .account(newMember)
+                .isChannelAdmin(false)
+                .isNotifEnabled(true)
+                .build();
+
+        conversationMemberRepository.save(member);
+        log.info("Member added to conversation {}: {}", conversation.getName(), newMember.getEmail());
+
+        return mapToConversationMemberResponse(member);
+    }
+
+    public List<MemberResponse> getConversationMembers(Long conversationId) {
+        Account currentAccount = getCurrentAccount();
+
+        verifyConversationMembership(conversationId, currentAccount.getAccountId());
+
+        List<ConversationMember> members = conversationMemberRepository
+                .findByConversationConversationId(conversationId);
+
+        return members.stream()
+                .map(this::mapToConversationMemberResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void removeMember(Long conversationId, Long memberId) {
+        Account currentAccount = getCurrentAccount();
+
+        verifyConversationAdmin(conversationId, currentAccount.getAccountId());
+
+        ConversationMember member = conversationMemberRepository
+                .findByConversationConversationIdAndAccountAccountId(conversationId, memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        member.setIsActive(false);
+        conversationMemberRepository.save(member);
+
+        log.info("Member removed from conversation: {}", member.getAccount().getEmail());
+    }
+
+    @Transactional
+    public void leaveConversation(Long conversationId) {
+        Account currentAccount = getCurrentAccount();
+
+        ConversationMember member = conversationMemberRepository
+                .findByConversationConversationIdAndAccountAccountId(conversationId, currentAccount.getAccountId())
+                .orElseThrow(() -> new RuntimeException("You are not a member of this conversation"));
+
+        member.setIsActive(false);
+        conversationMemberRepository.save(member);
+
+        log.info("User left conversation: {}", currentAccount.getEmail());
+    }
 
     private void verifyWorkspaceMembership(Long workspaceId, Long accountId, String message) {
         if (!workspaceMemberRepository.existsByWorkspaceWorkspaceIdAndAccountAccountId(
@@ -128,6 +215,7 @@ public class ConversationService {
             throw new RuntimeException("You don't have admin permission");
         }
     }
+
 
     private Account getCurrentAccount() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -169,7 +257,7 @@ public class ConversationService {
                 .memberId(member.getId())
                 .user(mapToUserInfo(member.getAccount()))
                 .role(member.getIsChannelAdmin() ? "ADMIN" : "MEMBER")
-                .isActive(true)
+                .isActive(member.getIsActive())
                 .joinedAt(member.getJoinedAt())
                 .build();
     }
