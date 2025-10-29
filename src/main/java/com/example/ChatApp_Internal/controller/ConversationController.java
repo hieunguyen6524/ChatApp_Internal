@@ -58,6 +58,13 @@ public class ConversationController {
         return ResponseEntity.ok(ApiResponse.success(members));
     }
 
+    @PatchMapping("/{conversationId}")
+    public ResponseEntity<ApiResponse<ConversationResponse>> updateConversation(
+            @PathVariable Long conversationId, @RequestBody CreateConversationRequest request) {
+        ConversationResponse conversationResponse = conversationService.updateConversation(conversationId, request);
+        return ResponseEntity.ok(ApiResponse.success(conversationResponse));
+    }
+ 
     @DeleteMapping("{conversationId}/members/{memberId}")
     public ResponseEntity<ApiResponse<Void>> removeMember(
             @PathVariable Long conversationId,

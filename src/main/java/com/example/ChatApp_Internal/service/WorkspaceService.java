@@ -25,6 +25,8 @@ public class WorkspaceService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final WorkspaceRoleRepository workspaceRoleRepository;
     private final AccountRepository accountRepository;
+    private final ConversationRepository conversationRepository;
+    private final ConversationMemberRepository conversationMemberRepository;
     private final ProfileRepository profileRepository;
 
     @Transactional
@@ -168,6 +170,20 @@ public class WorkspaceService {
         member.setIsActive(false);
         workspaceMemberRepository.save(member);
 
+        List<ConversationMember> conversations = conversationMemberRepository
+                .findActiveMembersInWorkspaceByAccountId(workspaceId, memberId);
+
+        for (ConversationMember conv : conversations) {
+            conv.setIsActive(false);
+            conv.setLeftAt(System.currentTimeMillis());
+        }
+
+        if (!conversations.isEmpty()) {
+            conversationMemberRepository.saveAll(conversations);
+            log.info("Removed {} conversation memberships for member {}", conversations.size(), memberId);
+        }
+
+
         log.info("Member removed from workspace: {}", member.getAccount().getEmail());
     }
 
@@ -183,7 +199,18 @@ public class WorkspaceService {
 
         member.setIsActive(false);
         workspaceMemberRepository.save(member);
+        List<ConversationMember> conversations = conversationMemberRepository
+                .findActiveMembersInWorkspaceByAccountId(workspaceId, currentAccount.getAccountId());
 
+        for (ConversationMember conv : conversations) {
+            conv.setIsActive(false);
+            conv.setLeftAt(System.currentTimeMillis());
+        }
+
+        if (!conversations.isEmpty()) {
+            conversationMemberRepository.saveAll(conversations);
+            log.info("Leave {} conversation memberships for member {}", conversations.size(), currentAccount.getAccountId());
+        }
         log.info("User left workspace: {}", currentAccount.getEmail());
     }
 
