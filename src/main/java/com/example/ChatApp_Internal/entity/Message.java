@@ -50,6 +50,7 @@ public class Message {
     @Column(name = "updated_at")
     private Long updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private Set<Message> replies = new HashSet<>();
 
