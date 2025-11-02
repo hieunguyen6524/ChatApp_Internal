@@ -27,8 +27,11 @@ public class WebSocketMessageController {
             @Payload SendMessageRequest request,
             Principal principal
     ) {
+
+        System.out.println(principal.getName());
+
         log.info("WebSocket message received from {} to conversation {}",
                 principal.getName(), conversationId);
-        return messageService.sendMessage(request);
+        return messageService.sendMessage(request, principal);
     }
 }

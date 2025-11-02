@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,55 @@ public class MessageService {
     public MessageResponse sendMessage(SendMessageRequest request) {
 
         Account currentAccount = getCurrentAccount();
+
+        Conversation conversation = conversationRepository.findById(request.getConversationId())
+                .orElseThrow(() -> new RuntimeException("Conversation not found"));
+
+        if (!conversationMemberRepository.existsByConversationConversationIdAndAccountAccountIdAndIsActiveTrue(
+                request.getConversationId(), currentAccount.getAccountId()
+        )) {
+            throw new RuntimeException("You are not a member of this conversation");
+        }
+
+        Message message = Message.builder()
+                .conversation(conversation)
+                .sender(currentAccount)
+                .content(request.getContent())
+                .contentType(request.getContentType())
+                .isDeleted(false)
+                .isPinned(false)
+                .build();
+
+        if (request.getParentId() != null) {
+            Message parent = messageRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new RuntimeException("Parent message not found"));
+            message.setParent(parent);
+        }
+
+
+        /*
+         * Cac chuc nang chua phat trien
+         * gui file/link => request.getAttacmentIds()
+         * cam xuc tinh nhan
+         * */
+
+        message = messageRepository.save((message));
+
+        MessageResponse messageResponse = mapToMessageResponse(message);
+
+        messagingTemplate.convertAndSend(
+                "/topic/conversations/" + request.getConversationId(),
+                messageResponse
+        );
+
+        return messageResponse;
+    }
+
+    @Transactional
+    public MessageResponse sendMessage(SendMessageRequest request, Principal principal) {
+
+        Account currentAccount = accountRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("Account not found for email: " + principal.getName()));
 
         Conversation conversation = conversationRepository.findById(request.getConversationId())
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
