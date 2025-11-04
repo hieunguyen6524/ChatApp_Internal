@@ -21,8 +21,8 @@ public class CookieUtil {
     public void addRefreshTokenCookie(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie(refreshCookieName, token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // Set true in production with HTTPS
-        cookie.setPath("/api/auth/");
+        cookie.setSecure(true); // Set true in production with HTTPS
+        cookie.setPath("/");
         cookie.setMaxAge(refreshCookieMaxAge);
         cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
@@ -30,7 +30,7 @@ public class CookieUtil {
 
     public void clearRefreshTokenCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie(refreshCookieName, "");
-        cookie.setPath("/api/auth/");
+        cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
     }
