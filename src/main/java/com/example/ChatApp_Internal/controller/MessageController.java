@@ -3,14 +3,13 @@ package com.example.ChatApp_Internal.controller;
 import com.example.ChatApp_Internal.dto.request.SendMessageRequest;
 import com.example.ChatApp_Internal.dto.response.ApiResponse;
 import com.example.ChatApp_Internal.dto.response.MessageResponse;
+import com.example.ChatApp_Internal.dto.response.PageResponse;
 import com.example.ChatApp_Internal.service.MessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,11 +27,11 @@ public class MessageController {
     }
 
     @GetMapping("/conversation/{conversationId}")
-    public ResponseEntity<ApiResponse<List<MessageResponse>>> getMessages(
+    public ResponseEntity<ApiResponse<PageResponse<MessageResponse>>> getMessages(
             @PathVariable Long conversationId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
-        List<MessageResponse> messages = messageService.getMessages(conversationId, page, size);
+            @RequestParam(defaultValue = "20") int size) {
+        PageResponse<MessageResponse> messages = messageService.getMessages(conversationId, page, size);
         return ResponseEntity.ok(ApiResponse.success(messages));
     }
 }

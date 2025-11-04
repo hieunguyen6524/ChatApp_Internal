@@ -2,6 +2,7 @@ package com.example.ChatApp_Internal.service;
 
 import com.example.ChatApp_Internal.dto.request.SendMessageRequest;
 import com.example.ChatApp_Internal.dto.response.MessageResponse;
+import com.example.ChatApp_Internal.dto.response.PageResponse;
 import com.example.ChatApp_Internal.dto.response.UserInfo;
 import com.example.ChatApp_Internal.entity.Account;
 import com.example.ChatApp_Internal.entity.Conversation;
@@ -133,7 +134,7 @@ public class MessageService {
         return messageResponse;
     }
 
-    public List<MessageResponse> getMessages(Long conversationId, int page, int size) {
+    public PageResponse<MessageResponse> getMessages(Long conversationId, int page, int size) {
         Account currentAccount = getCurrentAccount();
 
         // Verify membership
@@ -143,13 +144,22 @@ public class MessageService {
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<Message> messages = messageRepository
+        Page<Message> messagesPage = messageRepository
                 .findByConversationConversationIdAndIsDeletedFalseOrderByCreatedAtDesc(
                         conversationId, pageable);
 
-        return messages.getContent().stream()
+        List<MessageResponse> messsages = messagesPage.getContent().stream()
                 .map(this::mapToMessageResponse)
                 .collect(Collectors.toList());
+
+        return PageResponse.<MessageResponse>builder()
+                .content(messsages)
+                .pageNumber(messagesPage.getNumber())
+                .pageSize(messagesPage.getSize())
+                .totalElements(messagesPage.getTotalElements())
+                .totalPages(messagesPage.getTotalPages())
+                .last(messagesPage.isLast())
+                .build();
     }
 
     private Account getCurrentAccount() {
